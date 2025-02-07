@@ -1,30 +1,36 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import AccidentSerializer
+from .models import Accident, Branch
+from .serializers import AccidentSerializer, BranchSerializer
 
 class AccidentView(APIView):
-    def post(self, request, *args, **kwargs):
-        print("JSON recebido:", request.data)  # Debug
+    def post(self, request):
+        data = request.data.get("data", {}).get("accidents", {}).get("items", [])
+        branch_data = request.data.get("data", {}).get("currentSession", {}).get("branch", {})
 
-        accident_data = request.data.get("data", {}).get("accidents", {}).get("items")
+        # if not data:
+        #     return Response({"error": "Nenhum dado de acidente encontrado."}, status=status.HTTP_400_BAD_REQUEST)
 
-        if accident_data is None:
-            return Response({"error": "Formato de JSON inválido"}, status=status.HTTP_400_BAD_REQUEST)
+        # Processa ou cria a filial (Branch)
+        branch, _ = Branch.objects.get_or_create(
+            id=branch_data["id"],
+            defaults={
+                "organizationId": branch_data["organizationId"],
+                "name": branch_data["name"]
+            }
+        )
+ 
+        created_accidents = []
+        for accident_data in data:
+            # Adiciona a filial ao JSON antes de serializar
+            accident_data["branch"] = branch.id
 
-        # if not accident_data:
-        #     return Response({"message": "Nenhum acidente encontrado", "accidents": []}, status=status.HTTP_200_OK)
-
-        accidents_created = []
-        for accident in accident_data:
-            print("Processando acidente:", accident)  # Debug
-            serializer = AccidentSerializer(data=accident)
+            serializer = AccidentSerializer(data=accident_data)
             if serializer.is_valid():
-                serializer.save()
-                accidents_created.append(serializer.data)
+                accident = serializer.save(branch=branch)
+                created_accidents.append(serializer.data)
             else:
-                print("Erro no serializer:", serializer.errors)  # Mostra erros no terminal
-        if not accident_data:
-            return Response({"accidents": accidents_created}, status=status.HTTP_201_CREATED)
+                print(serializer.errors)  # Para debug
 
-        return Response({"accidents": accidents_created}, status=status.HTTP_201_CREATED)
+        return Response({"created_accidents": created_accidents}, status=status.HTTP_201_CREATED)
