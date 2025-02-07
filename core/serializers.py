@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import Accident
 
 class AccidentSerializer(serializers.ModelSerializer):
+    social_security_affiliation = serializers.CharField(required=False, allow_null=True)
     class Meta:
         model = Accident
         fields = '__all__'

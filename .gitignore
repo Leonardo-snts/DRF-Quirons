@@ -1,6 +1,6 @@
 .env
 venv/
-json.json
+jason.json
 __pycache__/
 /__pycache__/*
 *.pyc
