@@ -29,14 +29,11 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = ["*"] # Permitindo o acesso de qualquer host, substituir para o dominio quando houver.
-
-CORS_ORIGIN_ALLOW_ALL = True
-
-# CORS_ALLOWED_ORIGINS = [
-#     'http://localhost:3000',       # Para testes locais
-#     'http://127.0.0.1:3000',       # Para testes locais
-# ]
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    'localhost',
+    os.getenv('DOMINIO') # Cloud Run
+]
 
 # Configurações static e media files no cloud storage
 STATIC_URL = "/static/"
