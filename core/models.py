@@ -1,5 +1,4 @@
 from django.db import models
-import uuid
 
 class Branch(models.Model):
     id = models.CharField(max_length=255, unique=True, primary_key=True)
@@ -7,20 +6,32 @@ class Branch(models.Model):
     name = models.CharField(max_length=255)
 
 class Accident(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    summary = models.CharField(max_length=255, unique=True)  # Evita duplicidade com um campo único
+    id = models.CharField(max_length=255, unique=True, primary_key=True)
+    accidentTypeEnum = models.CharField(max_length=50, null=True, blank=True)
+    accidentPotential = models.CharField(max_length=50, null=True, blank=True)
+    summary = models.CharField(max_length=255)  
     date = models.DateTimeField()
+    timeWorked = models.DurationField(null=True, blank=True)
     description = models.TextField()
-    location_description = models.TextField(null=True, blank=True)
     street = models.CharField(max_length=255, null=True, blank=True)
     city = models.CharField(max_length=100)
     state = models.CharField(max_length=50)
     country = models.CharField(max_length=50)
-    social_security_affiliation = models.CharField(max_length=50)
-    days_lost = models.IntegerField(null=True, blank=True)
-    last_day_work = models.DateTimeField(null=True, blank=True)
-    worked_hours = models.DateTimeField(null=True, blank=True)
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE, null=False, blank=False)
-
+    tag = models.CharField(max_length=255, null=True, blank=True)
+    locomotion = models.CharField(max_length=255, null=True, blank=True)
+    daysLost = models.IntegerField(null=True, blank=True)
+    retired = models.BooleanField(null=True, blank=True, default=False)  # VERFICAR SE É BOOLEAN
+    hasAbsence = models.BooleanField(null=True, blank=True, default=False)
+    icd_code = models.CharField(max_length=50, null=True, blank=True)
+    comunicationType = models.CharField(max_length=50, null=True, blank=True)
+    person_age = models.IntegerField(null=True, blank=True)
+    person_gender = models.CharField(max_length=50, null=True, blank=True)
+    
+    def save(self, *args, **kwargs):
+        if self.locomotion:
+            self.locomotion = self.locomotion.lower()  # Converte para minúsculas
+        super().save(*args, **kwargs)
+        
     def __str__(self):
         return self.summary
