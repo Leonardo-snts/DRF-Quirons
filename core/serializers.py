@@ -28,7 +28,7 @@ class AccidentSerializer(serializers.ModelSerializer):
         validated_data['icd_code'] = icd_data.get('code', None)
        
         # Verifica se já existe um acidente com o mesmo id e data
-        accident, created = Accident.objects.get_or_create(
+        accident, created = Accident.objects.update_or_create(
             summary=validated_data.get("id"),
             # date=validated_data.get("date"),
             defaults={**validated_data, "branch": branch}
